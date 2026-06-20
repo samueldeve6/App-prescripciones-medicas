@@ -129,7 +129,7 @@ export class PrescriptionsService {
       throw new ForbiddenException('No tienes permiso para descargar esta prescripción');
     }
 
-    // 3. Crear el documento PDF en memoria
+    // 3. Crear el documento PDF en memoria 
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({ margin: 50 });
       const chunks: Buffer[] = [];

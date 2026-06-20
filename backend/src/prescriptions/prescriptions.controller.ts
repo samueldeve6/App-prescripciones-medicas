@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards, Req, Get, Query, Param, Put, Res } from '@nestjs/common';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { PrescriptionsService } from './prescriptions.service.js';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
@@ -53,7 +53,7 @@ export class PrescriptionsController {
     // Genera y descarga un PDF con el detalle de la prescripción. Solo el paciente asociado a la prescripción puede descargar su PDF.
     @Get(':id/pdf')
     @Roles('patient') // Exigido por el contrato de la prueba
-    async downloadPdf(@Param('id') id: string, @Req() req: any, @Res() res: any) {
+    async downloadPdf(@Param('id') id: string, @Req() req: any, @Res() res: Response) {
     const pdfBuffer = await this.prescriptionsService.generatePdf(id, req.user.userId || req.user.sub);
 
     // Configurar las cabeceras HTTP para que el navegador entienda que es un PDF descargable
