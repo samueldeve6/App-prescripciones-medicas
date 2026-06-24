@@ -17,7 +17,7 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        setLoading(false);
+        setLoading(true);
 
         try {
             const data = await fetcher('/auth/login', {
@@ -25,22 +25,41 @@ export default function LoginPage() {
                 body: JSON.stringify({ email, password }),
             });
 
+            const token = data.access_token;
+
+            if(!token){
+                throw new Error('No se recibió un token de acceso del servidor');
+            }
+
+            //Decodificamos la parte central (payload) del JWT de forma nativa
+            const base64Url = token.split('.')[1];
+            if (!base64Url) {
+            throw new Error('El token recibido no tiene un formato válido.');
+            }
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(window.atob(base64));
+
+            console.log('Payload decodificado del JWT:', payload);
+
             // Guardamos en Zustand mapenado exactamente los nombre del backend
 
-            setAuth(data.access_token, {
-                userId: data.user. sub || data.user.id,
-                email: data.user.email,
-                role: data.user.role,
-                name: data.user.name || data.user.email.split('@')[0], // Si no tiene nombre, saca un alias del email
+            setAuth(token, {
+                userId: payload. sub ,
+                email: payload.email,
+                role: payload.role,
+                name: payload.name,
             });
 
-            // Redirección inteligente basada en el backend
-            if (data.user.role === 'doctor') router.push('/doctor/prescriptions');
-            else if (data.user.role === 'patient') router.push('/patient/prescriptions');
-            else if (data.user.role === 'admin') router.push('/admin');
+
+            // Redirección inteligente basada en el rol del JWT
+            if (payload.role === 'doctor') router.push('/doctor/prescriptions');
+            else if (payload.role === 'patient') router.push('/patient/prescriptions');
+            else if (payload.role === 'admin') router.push('/admin');
 
         } catch (err: any) {
             setError(err.message || 'Credenciales incorrectas');
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -49,7 +68,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md dark:bg-gray-800">
         <div>
           <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Innovatech Medical
+            Sistema Médico
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Ingresa a tu panel de control

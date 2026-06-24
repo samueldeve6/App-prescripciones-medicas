@@ -110,7 +110,7 @@ export class PrescriptionsService {
       },
       include: {
         items: true,
-        author: { include: { user: { select: { name: true } } } }, // Para que el paciente vea el nombre de su doctor
+        author: { include: { user: { select: { name: true, email: true} } } }, // Para que el paciente vea el nombre de su doctor
       },
       orderBy: { createdAt: 'desc' },
       take: Number(limit),
