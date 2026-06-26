@@ -36,6 +36,14 @@ export class PrescriptionsController {
         return this.prescriptionsService.findAll(query, req.user.userId || req.user.sub);
     }
 
+    // Permite al doctor obtener la lista de pacientes para el selector del formulario
+    @Get('patients/search')
+    @Roles('doctor', 'admin')
+    async searchPatients() {
+    // Delegamos el trabajo al servicio
+    return this.prescriptionsService.findAllPatients();
+    }
+
     // Busca y retorna el detalle completo de una prescripción específica por su ID, incluyendo la lista de medicamentos, datos del paciente y del doctor.
     @Get(':id')
     @Roles('doctor', 'admin', 'patient')
@@ -55,6 +63,8 @@ export class PrescriptionsController {
     @Roles('patient') // Exigido por el contrato de la prueba
     async downloadPdf(@Param('id') id: string, @Req() req: any, @Res() res: Response) {
     const pdfBuffer = await this.prescriptionsService.generatePdf(id, req.user.userId || req.user.sub);
+
+    
 
     // Configurar las cabeceras HTTP para que el navegador entienda que es un PDF descargable
     res.set({

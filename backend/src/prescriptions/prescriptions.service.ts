@@ -171,6 +171,14 @@ export class PrescriptionsService {
     });
   }
 
-
+  async findAllPatients() {
+    return this.prisma.patient.findMany({
+      include: {
+        user: {
+          select: { name: true, email: true }
+        }
+      }
+    });
+  }
 
 }
