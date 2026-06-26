@@ -14,7 +14,9 @@ import {
   X, 
   Download, 
   Lock, 
-  Sparkles 
+  Sparkles, 
+  Search, 
+  Filter 
 } from 'lucide-react';
 
 export default function LandingPage() {
