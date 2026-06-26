@@ -39,19 +39,30 @@ export class PrescriptionsService {
     }
   // Listar prescripciones con filtros y paginación (Contrato 4)
   async findAll(query: any, doctorUserId: string) {
-    const { mine, status, page = 1, limit = 10 } = query;
+    const { mine, status, page = 1, limit = 5, search } = query; // Cambiado default a 5 para emparejar frontend
     const skip = (page - 1) * limit;
 
     return this.prisma.prescription.findMany({
       where: {
-        // Si mine=true, filtramos por el doctor que está logueado
+        // Si mine=true o estás en el panel del doctor, filtramos por el médico logueado
         ...(mine === 'true' && { author: { userId: doctorUserId } }),
-        ...(status && { status }),
+        ...(status && { status }), // Filtra por 'pending' o 'consumed'
+        ...(search && {
+          patient: {
+            user: {
+              name: {
+                contains: search,
+                mode: 'insensitive', // No importa mayúsculas/minúsculas
+              },
+            },
+          },
+        }),
       },
       include: {
-        patient: { include: { user: { select: { name: true } } } },
+        patient: { include: { user: { select: { name: true, email: true } } } },
+        items: true, // ◄--- SOLUCIÓN AL "0": Ahora Prisma sí carga los medicamentos
       },
-      orderBy: { createdAt: 'desc' }, // Requerimiento técnico: createdAt DESC
+      orderBy: { createdAt: 'desc' },
       take: Number(limit),
       skip: Number(skip),
     });
